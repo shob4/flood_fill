@@ -22,7 +22,6 @@ impl<T> Matrix<T> {
 
 fn main() {
     println!("Hello, world!");
-    println!("wow");
 }
 
 /*
@@ -58,23 +57,38 @@ fn flood_fill_base(
         // setting new node to correct color
         result_image.data[result_image.num_columns * new_sc + new_sr] = color;
         // checking if adjacent nodes have been visited or have the correct color
-        let new_color = image.get(new_sr + 1, new_sc);
-        let new_color = match new_color {
+        match image.get(new_sr + 1, new_sc) {
             Err(error) => panic!("{error}"),
-            Ok(i) => i,
+            Ok(i) => {
+                if i == start_color {
+                    not_visited.push_back((new_sr + 1, new_sc));
+                }
+            }
         };
-        if new_color == start_color {
-            not_visited.push_back((new_sr + 1, new_sc));
-        }
-        if image.get(new_sr, new_sc + 1).unwrap() == start_color {
-            not_visited.push_back((new_sr, new_sc + 1));
-        }
-        if image.get(new_sr - 1, new_sc).unwrap() == start_color {
-            not_visited.push_back((new_sr - 1, new_sc));
-        }
-        if image.get(new_sr, new_sc - 1).unwrap() == start_color {
-            not_visited.push_back((new_sr, new_sc - 1));
-        }
+        match image.get(new_sr, new_sc + 1) {
+            Err(error) => panic!("{error}"),
+            Ok(i) => {
+                if i == start_color {
+                    not_visited.push_back((new_sr, new_sc + 1));
+                }
+            }
+        };
+        match image.get(new_sr - 1, new_sc) {
+            Err(error) => panic!("{error}"),
+            Ok(i) => {
+                if i == start_color {
+                    not_visited.push_back((new_sr - 1, new_sc));
+                }
+            }
+        };
+        match image.get(new_sr, new_sc - 1) {
+            Err(error) => panic!("{error}"),
+            Ok(i) => {
+                if i == start_color {
+                    not_visited.push_back((new_sr, new_sc - 1));
+                }
+            }
+        };
     }
 
     result_image
