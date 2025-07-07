@@ -6,12 +6,12 @@ struct Matrix<T> {
 }
 
 impl<T> Matrix<T> {
-    fn get(&self, col: usize, row: usize) -> Option<&T> {
-        if col >= self.num_columns {
-            return None;
-        }
+    fn get(&self, col: usize, row: usize) -> Result<&T, String> {
         let index: usize = self.num_columns * row + col;
-        self.data.get(index)
+        match self.data.get(index) {
+            Some(x) => Ok(x),
+            None => Err("{index} is out of {self.data.len}".to_string()),
+        }
     }
 
     // fn set(&self, col: usize, row: usize, value: i32) {
@@ -22,6 +22,7 @@ impl<T> Matrix<T> {
 
 fn main() {
     println!("Hello, world!");
+    println!("wow");
 }
 
 /*
@@ -48,11 +49,21 @@ fn flood_fill_base(
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
     not_visited.push_back((sr as usize, sc as usize));
     while !not_visited.is_empty() {
-        let new_tuple: Option<(usize, usize)> = not_visited.pop_front();
-        let (new_sr, new_sc) = new_tuple.unwrap();
+        // visit new node
+        let new_tuple: (usize, usize) = match not_visited.pop_front() {
+            None => panic!("empty not_visited, line 53"),
+            Some(i) => i,
+        };
+        let (new_sr, new_sc) = new_tuple;
+        // setting new node to correct color
         result_image.data[result_image.num_columns * new_sc + new_sr] = color;
-        // TODO maybe check if it exists
-        if image.get(new_sr + 1, new_sc).unwrap() == start_color {
+        // checking if adjacent nodes have been visited or have the correct color
+        let new_color = image.get(new_sr + 1, new_sc);
+        let new_color = match new_color {
+            Err(error) => panic!("{error}"),
+            Ok(i) => i,
+        };
+        if new_color == start_color {
             not_visited.push_back((new_sr + 1, new_sc));
         }
         if image.get(new_sr, new_sc + 1).unwrap() == start_color {
