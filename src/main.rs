@@ -46,6 +46,7 @@ fn flood_fill_base(
     }
     let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
+    let mut visited: Vec<(usize, usize)> = Vec::new();
     not_visited.push_back((sr as usize, sc as usize));
     while !not_visited.is_empty() {
         // visit new node
@@ -54,42 +55,97 @@ fn flood_fill_base(
             Some(i) => i,
         };
         let (new_sr, new_sc) = new_tuple;
+        visited.push(new_tuple);
         // setting new node to correct color
         result_image.data[result_image.num_columns * new_sc + new_sr] = color;
         // checking if adjacent nodes have been visited or have the correct color
-        match image.get(new_sr + 1, new_sc) {
-            Err(error) => panic!("{error}"),
-            Ok(i) => {
-                if i == start_color {
-                    not_visited.push_back((new_sr + 1, new_sc));
+        if !visited.iter().any(|&i| i == (new_sc + 1, new_sr)) {
+            match image.get(new_sr + 1, new_sc) {
+                Err(error) => panic!("{error}"),
+                Ok(i) => {
+                    if i == start_color {
+                        not_visited.push_back((new_sr + 1, new_sc));
+                    }
                 }
-            }
-        };
-        match image.get(new_sr, new_sc + 1) {
-            Err(error) => panic!("{error}"),
-            Ok(i) => {
-                if i == start_color {
-                    not_visited.push_back((new_sr, new_sc + 1));
+            };
+        }
+        if !visited.iter().any(|&i| i == (new_sc, new_sr + 1)) {
+            match image.get(new_sr, new_sc + 1) {
+                Err(error) => panic!("{error}"),
+                Ok(i) => {
+                    if i == start_color {
+                        not_visited.push_back((new_sr, new_sc + 1));
+                    }
                 }
-            }
-        };
-        match image.get(new_sr - 1, new_sc) {
-            Err(error) => panic!("{error}"),
-            Ok(i) => {
-                if i == start_color {
-                    not_visited.push_back((new_sr - 1, new_sc));
+            };
+        }
+        if !visited.iter().any(|&i| i == (new_sc - 1, new_sr)) {
+            match image.get(new_sr - 1, new_sc) {
+                Err(error) => panic!("{error}"),
+                Ok(i) => {
+                    if i == start_color {
+                        not_visited.push_back((new_sr - 1, new_sc));
+                    }
                 }
-            }
-        };
-        match image.get(new_sr, new_sc - 1) {
-            Err(error) => panic!("{error}"),
-            Ok(i) => {
-                if i == start_color {
-                    not_visited.push_back((new_sr, new_sc - 1));
+            };
+        }
+        if !visited.iter().any(|&i| i == (new_sc, new_sr - 1)) {
+            match image.get(new_sr, new_sc - 1) {
+                Err(error) => panic!("{error}"),
+                Ok(i) => {
+                    if i == start_color {
+                        not_visited.push_back((new_sr, new_sc - 1));
+                    }
                 }
-            }
-        };
+            };
+        }
     }
 
     result_image
+}
+
+fn flood_fill_diagonal_base(
+    image: Matrix<i32>,
+    length: usize,
+    width: usize,
+    sr: i32,
+    sc: i32,
+    color: i32,
+) -> Matrix<i32> {
+    let mut result_image: Matrix<i32> = Matrix {
+        data: VecDeque::with_capacity(length),
+        num_columns: width,
+    };
+    for index in 0..length {
+        result_image.data[index] = image.data[index];
+    }
+    let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
+    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
+    let mut visited: Vec<(usize, usize)> = Vec::new();
+    not_visited.push_back((sr as usize, sc as usize));
+    while !visited.is_empty() {
+        for i in -1..1 {
+            for j in -1..1 {
+                // visit new node
+                let new_tuple: (usize, usize) = match not_visited.pop_front() {
+                    None => panic!("empty not_visited, line 53"),
+                    Some(i) => i,
+                };
+                let (new_sr, new_sc) = new_tuple;
+                visited.push(new_tuple);
+                // setting new node to correct color
+                result_image.data[result_image.num_columns * new_sc + new_sr] = color;
+                if !visited.iter().any(|&k| k == (new_sr + i, new_sc + j)) {
+                    match image.get(new_sr + i, new_sc + j) {
+                        Err(err) => panic!("{error}"),
+                        Ok(k) => {
+                            if k == start_color {
+                                not_visited.push_back((new_sr + i, new_sc + j));
+                            }
+                        }
+                    };
+                }
+            }
+        }
+    }
 }
