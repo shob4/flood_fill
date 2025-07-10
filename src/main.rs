@@ -6,9 +6,9 @@ struct Matrix<T> {
 }
 
 impl<T> Matrix<T> {
-    fn get(&self, col: usize, row: usize) -> Result<&T, String> {
-        let index: usize = self.num_columns * row + col;
-        match self.data.get(index) {
+    fn get(&self, col: isize, row: isize) -> Result<&T, String> {
+        let index: isize = self.num_columns as isize * row + col;
+        match self.data.get(index as usize) {
             Some(x) => Ok(x),
             None => Err("{index} is out of {self.data.len}".to_string()),
         }
@@ -44,20 +44,20 @@ fn flood_fill_base(
     for index in 0..length {
         result_image.data[index] = image.data[index];
     }
-    let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
-    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
-    let mut visited: Vec<(usize, usize)> = Vec::new();
-    not_visited.push_back((sr as usize, sc as usize));
+    let start_color: &i32 = image.get(sr as isize, sc as isize).unwrap();
+    let mut not_visited: VecDeque<(isize, isize)> = VecDeque::with_capacity(length);
+    let mut visited: Vec<(isize, isize)> = Vec::new();
+    not_visited.push_back((sr as isize, sc as isize));
     while !not_visited.is_empty() {
         // visit new node
-        let new_tuple: (usize, usize) = match not_visited.pop_front() {
+        let new_tuple: (isize, isize) = match not_visited.pop_front() {
             None => panic!("empty not_visited, line 53"),
             Some(i) => i,
         };
         let (new_sr, new_sc) = new_tuple;
         visited.push(new_tuple);
         // setting new node to correct color
-        result_image.data[result_image.num_columns * new_sc + new_sr] = color;
+        result_image.data[result_image.num_columns * new_sc as usize + new_sr as usize] = color;
         // checking if adjacent nodes have been visited or have the correct color
         if !visited.iter().any(|&i| i == (new_sc + 1, new_sr)) {
             match image.get(new_sr + 1, new_sc) {
@@ -119,33 +119,34 @@ fn flood_fill_diagonal_base(
     for index in 0..length {
         result_image.data[index] = image.data[index];
     }
-    let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
-    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
-    let mut visited: Vec<(usize, usize)> = Vec::new();
-    not_visited.push_back((sr as usize, sc as usize));
+    let start_color: &i32 = image.get(sr as isize, sc as isize).unwrap();
+    let mut not_visited: VecDeque<(isize, isize)> = VecDeque::with_capacity(length);
+    let mut visited: Vec<(isize, isize)> = Vec::new();
+    let directions: [(isize, isize); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+    not_visited.push_back((sr as isize, sc as isize));
     while !visited.is_empty() {
-        for i in -1..1 {
-            for j in -1..1 {
-                // visit new node
-                let new_tuple: (usize, usize) = match not_visited.pop_front() {
-                    None => panic!("empty not_visited, line 53"),
-                    Some(i) => i,
-                };
-                let (new_sr, new_sc) = new_tuple;
-                visited.push(new_tuple);
-                // setting new node to correct color
-                result_image.data[result_image.num_columns * new_sc + new_sr] = color;
-                if !visited.iter().any(|&k| k == (new_sr + i, new_sc + j)) {
-                    match image.get(new_sr + i, new_sc + j) {
-                        Err(err) => panic!("{error}"),
-                        Ok(k) => {
-                            if k == start_color {
-                                not_visited.push_back((new_sr + i, new_sc + j));
-                            }
+        // going through all adjacent nodes, including diagonals
+        for (dx, dy) in directions {
+            // visit new node
+            let new_tuple: (isize, isize) = match not_visited.pop_front() {
+                None => panic!("empty not_visited, line 132"),
+                Some(i) => i,
+            };
+            let (new_sr, new_sc) = new_tuple;
+            visited.push(new_tuple);
+            // setting new node to correct color
+            result_image.data[result_image.num_columns * new_sc as usize + new_sr as usize] = color;
+            if !visited.iter().any(|&i| i == (new_sr + dx, new_sc + dy)) {
+                match image.get(new_sr + dx, new_sc + dy) {
+                    Err(error) => panic!("{error}, 141"),
+                    Ok(k) => {
+                        if k == start_color {
+                            not_visited.push_back((new_sr + dx, new_sc + dy));
                         }
-                    };
-                }
+                    }
+                };
             }
         }
     }
+    result_image
 }
