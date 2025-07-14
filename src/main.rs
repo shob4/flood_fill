@@ -140,22 +140,38 @@ fn flood_fill_diagonal_base_mess(
             visited.push(new_tuple);
             // setting new node to correct color
             result_image.data[result_image.num_columns * new_sc + new_sr] = color;
-            if !visited.iter().any(|&i| i == (new_sr + dx, new_sc + dy)) {
-                match image.get(new_sr + dx, new_sc + dy) {
+            let add_dx: usize = match new_sr.checked_add(dx) {
+                Some(result) => result,
+                None => panic!("Overflow adding dx and new_sr"),
+            };
+            let add_dy: usize = match new_sc.checked_add(dy) {
+                Some(result) => result,
+                None => panic!("Overflow adding dy and new_sc"),
+            };
+            let sub_dx: usize = match new_sr.checked_sub(dx) {
+                Some(result) => result,
+                None => panic!("Overflow subtracting dx and new_sr"),
+            };
+            let sub_dy: usize = match new_sr.checked_sub(dy) {
+                Some(result) => result,
+                None => panic!("Overflow subtracting dy and new_sc"),
+            };
+            if !visited.iter().any(|&i| i == (add_dx, add_dy)) {
+                match image.get(add_dx, add_dy) {
                     Err(error) => panic!("{error}"),
                     Ok(k) => {
                         if k == start_color {
-                            not_visited.push_back((new_sr + dx, new_sc + dy));
+                            not_visited.push_back((add_dx, add_dy));
                         }
                     }
                 };
             }
-            if !visited.iter().any(|&i| i == (new_sr - dx, new_sr - dy)) {
-                match image.get(new_sr - dx, new_sc - dy) {
+            if !visited.iter().any(|&i| i == (sub_dx, sub_dy)) {
+                match image.get(sub_dx, sub_dy) {
                     Err(error) => panic!("{error}"),
                     Ok(k) => {
                         if k == start_color {
-                            not_visited.push_back((new_sr - dx, new_sc - dy));
+                            not_visited.push_back((sub_dx, sub_dy));
                         }
                     }
                 };
