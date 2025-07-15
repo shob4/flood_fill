@@ -108,7 +108,7 @@ fn flood_fill_base(
  * This implementation is a mess
  * isize is needed for subtracting from usize readably, but it's a mess everywhere else
  */
-fn flood_fill_diagonal_base_mess(
+fn flood_fill_diagonal_base(
     image: Matrix<i32>,
     length: usize,
     width: usize,
@@ -126,7 +126,7 @@ fn flood_fill_diagonal_base_mess(
     let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
     let mut visited: Vec<(usize, usize)> = Vec::new();
-    let directions: [(usize, usize); 2] = [(1, 0), (0, 1)];
+    let directions: [(usize, usize); 3] = [(1, 0), (0, 1)(1, 1)];
     not_visited.push_back((sr as usize, sc as usize));
     while !visited.is_empty() {
         // going through all adjacent nodes, including diagonals
@@ -178,5 +178,21 @@ fn flood_fill_diagonal_base_mess(
             }
         }
     }
+    result_image
+}
+
+fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Vec<i32>> {
+    let mut result_image: Vec<Vec<i32>> = Vec::new();
+    for i in 0..image.len() {
+        for j in 0..image[i].len() {
+            result_image[i][j] = image[i][j];
+        }
+    }
+    let mut visited: VecDeque<(usize, usize)> = VecDeque::new();
+    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::new();
+    visited.push_back((sr as usize, sc as usize));
+    not_visited.push_back((sr as usize, sc as usize));
+    let directions: [(usize, usize); 2] = [(0, 1), (1, 0)];
+    while !not_visited.is_empty() {}
     result_image
 }
