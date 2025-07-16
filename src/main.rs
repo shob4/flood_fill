@@ -126,7 +126,7 @@ fn flood_fill_diagonal_base(
     let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
     let mut visited: Vec<(usize, usize)> = Vec::new();
-    let directions: [(usize, usize); 3] = [(1, 0), (0, 1)(1, 1)];
+    let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
     not_visited.push_back((sr as usize, sc as usize));
     while !visited.is_empty() {
         // going through all adjacent nodes, including diagonals
@@ -139,7 +139,7 @@ fn flood_fill_diagonal_base(
             let (new_sr, new_sc) = new_tuple;
             visited.push(new_tuple);
             // setting new node to correct color
-            result_image.data[result_image.num_columns * new_sc + new_sr] = color;
+            result_image.data[result_image.num_columns * new_sr + new_sc] = color;
             let add_dx: usize = match new_sr.checked_add(dx) {
                 Some(result) => result,
                 None => panic!("Overflow adding dx and new_sr"),
@@ -190,9 +190,34 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
     }
     let mut visited: VecDeque<(usize, usize)> = VecDeque::new();
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::new();
-    visited.push_back((sr as usize, sc as usize));
     not_visited.push_back((sr as usize, sc as usize));
     let directions: [(usize, usize); 2] = [(0, 1), (1, 0)];
-    while !not_visited.is_empty() {}
+    while !not_visited.is_empty() {
+        for (dx, dy) in directions {
+            let new_tuple = match not_visited.pop_front() {
+                Some(i) => i,
+                None => panic!("no tuple to pop"),
+            };
+            let (new_sr, new_sc) = new_tuple;
+            visited.push_back((new_sr, new_sc));
+            result_image[new_sr][new_sc] = color;
+            let add_dx: usize = match new_sr.checked_add(dx) {
+                Some(i) => i,
+                None => panic!("Couldn't add {dx} and {new_sr}"),
+            };
+            let add_dy: usize = match new_sc.checked_add(dy) {
+                Some(i) => i,
+                None => panic!("Couldn't add {dy} and {new_sc}"),
+            };
+            let sub_dx: usize = match new_sr.checked_sub(dx) {
+                Some(i) => i,
+                None => panic!("Couldn't subtract {dx} and {new_sr}"),
+            };
+            let sub_dy: usize = match new_sc.checked_sub(dy) {
+                Some(i) => i,
+                None => panic!("Couldn't subtract {dy} and {new_sc}"),
+            };
+        }
+    }
     result_image
 }
