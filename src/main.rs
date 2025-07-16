@@ -217,6 +217,12 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
                 Some(i) => i,
                 None => panic!("Couldn't subtract {dy} and {new_sc}"),
             };
+            if !visited.iter().any(|&i| i = add_dx, add_dy) {
+                match image[add_dx][add_dy] {
+                    Some(i) => not_visited.push_back((add_dx, add_dy)),
+                    None => panic!("Couldn't access image[{add_dx}][{add_dy}]"),
+                };
+            }
         }
     }
     result_image
