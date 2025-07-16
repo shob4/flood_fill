@@ -188,6 +188,10 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
             result_image[i][j] = image[i][j];
         }
     }
+    let start_color = match image.get(sr).and_then(|r| r.get(sc)) {
+        Some(i) => i,
+        None => return result_image,
+    };
     let mut visited: VecDeque<(usize, usize)> = VecDeque::new();
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::new();
     not_visited.push_back((sr as usize, sc as usize));
@@ -217,10 +221,14 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
                 Some(i) => i,
                 None => panic!("Couldn't subtract {dy} and {new_sc}"),
             };
-            if !visited.iter().any(|&i| i = add_dx, add_dy) {
-                match image[add_dx][add_dy] {
-                    Some(i) => not_visited.push_back((add_dx, add_dy)),
-                    None => panic!("Couldn't access image[{add_dx}][{add_dy}]"),
+            if !visited.iter().any(|&i| i == (add_dx, add_dy)) {
+                match image.get(add_dx).and_then(|r| r.get(add_dy)) {
+                    Some(i) => {
+                        if i == start_color {
+                            not_visited.push_back((add_dx, add_dy));
+                        }
+                    }
+                    None => (),
                 };
             }
         }
