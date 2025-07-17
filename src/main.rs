@@ -203,23 +203,23 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
                 None => panic!("no tuple to pop"),
             };
             let (new_sr, new_sc) = new_tuple;
-            visited.push_back((new_sr, new_sc));
+            visited.push_front((new_sr, new_sc));
             result_image[new_sr][new_sc] = color;
             let add_dx: usize = match new_sr.checked_add(dx) {
                 Some(i) => i,
-                None => panic!("Couldn't add {dx} and {new_sr}"),
+                None => new_sr,
             };
             let add_dy: usize = match new_sc.checked_add(dy) {
                 Some(i) => i,
-                None => panic!("Couldn't add {dy} and {new_sc}"),
+                None => new_sc,
             };
             let sub_dx: usize = match new_sr.checked_sub(dx) {
                 Some(i) => i,
-                None => panic!("Couldn't subtract {dx} and {new_sr}"),
+                None => new_sr,
             };
             let sub_dy: usize = match new_sc.checked_sub(dy) {
                 Some(i) => i,
-                None => panic!("Couldn't subtract {dy} and {new_sc}"),
+                None => new_sc,
             };
             if !visited.iter().any(|&i| i == (add_dx, add_dy)) {
                 match image.get(add_dx).and_then(|r| r.get(add_dy)) {
