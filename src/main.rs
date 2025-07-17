@@ -188,7 +188,7 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
             result_image[i][j] = image[i][j];
         }
     }
-    let start_color = match image.get(sr).and_then(|r| r.get(sc)) {
+    let start_color = match image.get(sr as usize).and_then(|r| r.get(sc as usize)) {
         Some(i) => i,
         None => return result_image,
     };
@@ -226,6 +226,16 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
                     Some(i) => {
                         if i == start_color {
                             not_visited.push_back((add_dx, add_dy));
+                        }
+                    }
+                    None => (),
+                };
+            }
+            if !visited.iter().any(|&i| i == (sub_dx, sub_dy)) {
+                match image.get(sub_dx).and_then(|r| r.get(sub_dy)) {
+                    Some(i) => {
+                        if i == start_color {
+                            not_visited.push_back((sub_dx, sub_dy));
                         }
                     }
                     None => (),
