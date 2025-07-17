@@ -7,10 +7,18 @@ struct Matrix<T> {
 
 impl<T> Matrix<T> {
     fn get(&self, col: usize, row: usize) -> Result<&T, String> {
-        let index: usize = self.num_columns * row + col;
+        let index: usize = self.num_columns * col + row;
         match self.data.get(index) {
             Some(x) => Ok(x),
             None => Err("cannot get: {index} is out of {self.data.len}".to_string()),
+        }
+    }
+
+    fn get_option(&self, col: usize, row: usize) -> Option<&T> {
+        let index: usize = self.num_columns * col + row;
+        match self.data.get(index) {
+            Some(x) => Some(x),
+            None => None,
         }
     }
 
@@ -129,32 +137,32 @@ fn flood_fill_diagonal_base(
     let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
     not_visited.push_back((sr as usize, sc as usize));
     while !visited.is_empty() {
+        // visit new node
+        let new_tuple: (usize, usize) = match not_visited.pop_front() {
+            None => panic!("empty not_visited"),
+            Some(i) => i,
+        };
+        let (new_sr, new_sc) = new_tuple;
         // going through all adjacent nodes, including diagonals
         for (dx, dy) in directions {
-            // visit new node
-            let new_tuple: (usize, usize) = match not_visited.pop_front() {
-                None => panic!("empty not_visited"),
-                Some(i) => i,
-            };
-            let (new_sr, new_sc) = new_tuple;
             visited.push(new_tuple);
             // setting new node to correct color
             result_image.data[result_image.num_columns * new_sr + new_sc] = color;
             let add_dx: usize = match new_sr.checked_add(dx) {
                 Some(result) => result,
-                None => panic!("Overflow adding dx and new_sr"),
+                None => new_sc,
             };
             let add_dy: usize = match new_sc.checked_add(dy) {
                 Some(result) => result,
-                None => panic!("Overflow adding dy and new_sc"),
+                None => new_sr,
             };
             let sub_dx: usize = match new_sr.checked_sub(dx) {
                 Some(result) => result,
-                None => panic!("Overflow subtracting dx and new_sr"),
+                None => new_sc,
             };
             let sub_dy: usize = match new_sr.checked_sub(dy) {
                 Some(result) => result,
-                None => panic!("Overflow subtracting dy and new_sc"),
+                None => new_sr,
             };
             if !visited.iter().any(|&i| i == (add_dx, add_dy)) {
                 match image.get(add_dx, add_dy) {
@@ -181,6 +189,80 @@ fn flood_fill_diagonal_base(
     result_image
 }
 
+// IMPORTANT columns and rows should be in the right place here
+fn flood_fill_diagonal_range(
+    image: Matrix<i32>,
+    length: usize,
+    width: usize,
+    sr: i32,
+    sc: i32,
+    color: i32,
+    acceptable_difference: i32,
+) -> Matrix<i32> {
+    let mut result_image: Matrix<i32> = Matrix {
+        data: VecDeque::with_capacity(length),
+        num_columns: width,
+    };
+    for index in 0..length {
+        result_image.data[index] = image.data[index];
+    }
+    let start_color: &i32 = image.get(sr as usize, sc as usize).unwrap();
+    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(length);
+    let mut visited: VecDeque<(usize, usize)> = VecDeque::new();
+    let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
+    not_visited.push_back((sc as usize, sr as usize));
+    while !not_visited.is_empty() {
+        let next_coordinate: (usize, usize) = match not_visited.pop_front() {
+            Some(i) => i,
+            None => panic!("Empty not_visited in loop"),
+        };
+        let (new_sc, new_sr) = next_coordinate;
+        result_image.data[result_image.num_columns * new_sc + new_sr] = color;
+        visited.push_front(next_coordinate);
+        for (dc, dr) in directions {
+            let add_dr: usize = match new_sr.checked_add(dr) {
+                Some(i) => i,
+                None => new_sr,
+            };
+            let add_dc: usize = match new_sc.checked_add(dc) {
+                Some(i) => i,
+                None => new_sc,
+            };
+            let sub_dr: usize = match new_sr.checked_sub(dr) {
+                Some(i) => i,
+                None => new_sr,
+            };
+            let sub_dc: usize = match new_sc.checked_sub(dc) {
+                Some(i) => i,
+                None => new_sc,
+            };
+            if !visited.iter().any(|&i| i == (add_dr, add_dc)) {
+                match image.get_option(add_dc, add_dr) {
+                    Some(i) => {
+                        if i <= start_color + acceptable_difference
+                            && i >= start_color - acceptable_difference
+                        {
+                            visited.push_back((add_dc, add_dr));
+                        }
+                    }
+                    None => (),
+                }
+                match image.get_option(sub_dc, sub_dr) {
+                    Some(i) => {
+                        if i <= start_color + acceptable_difference
+                            && i >= start_color - acceptable_difference
+                        {
+                            visited.push_back((sub_dc, add_dr));
+                        }
+                    }
+                    None => (),
+                }
+            };
+        }
+    }
+    result_image
+}
+
 fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Vec<i32>> {
     let mut result_image: Vec<Vec<i32>> = Vec::new();
     for i in 0..image.len() {
@@ -197,13 +279,13 @@ fn flood_fill_leet(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Ve
     not_visited.push_back((sr as usize, sc as usize));
     let directions: [(usize, usize); 2] = [(0, 1), (1, 0)];
     while !not_visited.is_empty() {
+        let new_tuple = match not_visited.pop_front() {
+            Some(i) => i,
+            None => panic!("no tuple to pop"),
+        };
+        let (new_sr, new_sc) = new_tuple;
+        visited.push_front((new_sr, new_sc));
         for (dx, dy) in directions {
-            let new_tuple = match not_visited.pop_front() {
-                Some(i) => i,
-                None => panic!("no tuple to pop"),
-            };
-            let (new_sr, new_sc) = new_tuple;
-            visited.push_front((new_sr, new_sc));
             result_image[new_sr][new_sc] = color;
             let add_dx: usize = match new_sr.checked_add(dx) {
                 Some(i) => i,
