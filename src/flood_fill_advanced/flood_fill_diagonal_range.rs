@@ -2,6 +2,10 @@ use crate::matrix::Matrix;
 use std::collections::VecDeque;
 
 // IMPORTANT columns and rows should be in the right place here
+/*
+ * finds all pixels within the acceptable range from the start color and changes them to the
+ * provided color.
+ */
 fn flood_fill_diagonal_range(
     image: Matrix<i32>,
     length: usize,
