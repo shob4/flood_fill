@@ -1,4 +1,5 @@
 use crate::matrix::Matrix;
+use crate::path_tree::Node;
 use std::collections::VecDeque;
 
 /*
@@ -19,14 +20,15 @@ fn flood_fill_targeted(
         data: VecDeque::with_capacity(width * height),
         num_columns: width,
     };
-    let mut distance: i32 = 1;
-    let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
     for col in 0..width {
         for row in 0..height {
             let index = result_image.num_columns * col + row;
             result_image.data[index] = find_distance(col, tc, row, tr);
         }
     }
+    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
+    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
+    let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
     result_image
 }
 
