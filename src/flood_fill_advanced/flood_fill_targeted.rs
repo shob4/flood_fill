@@ -27,8 +27,38 @@ fn flood_fill_targeted(
         }
     }
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
-    let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
+    let mut visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
     let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
+    not_visited.push_front((sc, sr));
+    while !not_visited.is_empty() {
+        let next_coordinate: (usize, usize) = match not_visited.pop_front() {
+            Some(i) => i,
+            None => panic!("Empty not_visited in loop"),
+        };
+        let (new_sc, new_sr) = next_coordinate;
+        // TODO needs a way to update distance information. Should I be redoing the whole thing
+        // with Nodes?
+        result_image.data[result_image.num_columns * new_sc + new_sr] = color;
+        visited.push_front(next_coordinate);
+        for (dc, dr) in directions {
+            let add_dc: usize = match new_sc.checked_add(dc) {
+                Some(i) => i,
+                None => new_sc,
+            };
+            let add_dr: usize = match new_sr.checked_add(dr) {
+                Some(i) => i,
+                None => new_sr,
+            };
+            let sub_dc: usize = match new_sc.checked_sub(dc) {
+                Some(i) => i,
+                None => new_sc,
+            };
+            let sub_dr: usize = match new_sr.checked_sub(dr) {
+                Some(i) => i,
+                None => new_sr,
+            };
+        }
+    }
     result_image
 }
 
