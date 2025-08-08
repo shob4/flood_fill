@@ -27,6 +27,7 @@ fn flood_fill_targeted(
         }
     }
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
+    // TODO figure out how to make this the tree
     let mut visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
     let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
     not_visited.push_front((sc, sr));
@@ -38,6 +39,9 @@ fn flood_fill_targeted(
         let (new_sc, new_sr) = next_coordinate;
         // TODO needs a way to update distance information. Should I be redoing the whole thing
         // with Nodes?
+        // redo from current position to there? how? maybe add 1?
+        // visited should be in tree form
+        let color: i32 = function_to_determine_new_distance();
         result_image.data[result_image.num_columns * new_sc + new_sr] = color;
         visited.push_front(next_coordinate);
         for (dc, dr) in directions {
@@ -70,4 +74,8 @@ fn find_distance(col1: usize, col2: usize, row1: usize, row2: usize) -> i32 {
     let to_be_rooted: i32 = col_sqr + row_sqr;
     let rooted: i32 = to_be_rooted.isqrt();
     rooted
+}
+
+fn function_to_determine_new_distance() -> i32 {
+    0
 }
