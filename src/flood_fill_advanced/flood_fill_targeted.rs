@@ -28,7 +28,7 @@ fn flood_fill_targeted(
     }
     let mut not_visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
     // TODO figure out how to make this the tree
-    let mut visited: VecDeque<(usize, usize)> = VecDeque::with_capacity(width * height);
+    let mut visited: VecDeque<Node> = VecDeque::new();
     let directions: [(usize, usize); 3] = [(1, 0), (0, 1), (1, 1)];
     not_visited.push_front((sc, sr));
     while !not_visited.is_empty() {
@@ -43,7 +43,7 @@ fn flood_fill_targeted(
         // visited should be in tree form
         let color: i32 = function_to_determine_new_distance();
         result_image.data[result_image.num_columns * new_sc + new_sr] = color;
-        visited.push_front(next_coordinate);
+        visited.push_back(Node::new(color, None, (new_sc, new_sc)));
         for (dc, dr) in directions {
             let add_dc: usize = match new_sc.checked_add(dc) {
                 Some(i) => i,
